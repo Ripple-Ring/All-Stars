@@ -32,7 +32,7 @@ end
 
 --- ends the round :P
 function Squigglepants.endRound()
-    mapmusname = "BFDIHU"
+    mapmusname = "KARSRE"
     S_ChangeMusic(mapmusname, true)
     Squigglepants.sync.gamestate = SST_INTERMISSION
 
