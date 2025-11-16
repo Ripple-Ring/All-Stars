@@ -32,7 +32,7 @@ end
 
 --- ends the round :P
 function Squigglepants.endRound()
-    mapmusname = "KARWIN"
+    mapmusname = "BFDIHU"
     S_ChangeMusic(mapmusname, true)
     Squigglepants.sync.gamestate = SST_INTERMISSION
 
@@ -243,7 +243,12 @@ local function drawVoteMaps(v, offsetX, offsetY, margin)
         local modeName
         
         if i < 4 then
-            lvlgfx = Squigglepants.HUD.getPatch(v, G_BuildMapName(map[1]) + "P")
+            local name = G_BuildMapName(map[1]) + "P"
+            if v.patchExists(name) then
+                lvlgfx = Squigglepants.HUD.getPatch(v, G_BuildMapName(map[1]) + "P")
+            else
+                lvlgfx = Squigglepants.HUD.getPatch(v, "BLANKLVL")
+            end
             modeName = Squigglepants.gametypes[map[2]].name
         else
             lvlgfx = Squigglepants.HUD.getPatch(v, "BLANKLVL")
@@ -372,7 +377,12 @@ local function rouletteHUD(v)
             local modeName
             
             if i < 4 then
-                lvlgfx = Squigglepants.HUD.getPatch(v, G_BuildMapName(map[1]) + "P")
+                local name = G_BuildMapName(map[1]) + "P"
+                if v.patchExists(name) then
+                    lvlgfx = Squigglepants.HUD.getPatch(v, name)
+                else
+                    lvlgfx = blankgfx
+                end
                 modeName = Squigglepants.gametypes[map[2]].name
             else
                 lvlgfx = blankgfx
@@ -419,7 +429,13 @@ local function rouletteHUD(v)
         local x, y = (160*FU - blankgfx.width*mapScale/2 + xOffset), (100*FU - blankgfx.height*mapScale/2 + yOffset)
 
         local map = Squigglepants.sync.selectedMap
-        local lvlgfx = Squigglepants.HUD.getPatch(v, G_BuildMapName(map[1]) + "P")
+
+        local lvlgfx = G_BuildMapName(map[1]) + "P"
+        if v.patchExists(lvlgfx) then
+            lvlgfx = Squigglepants.HUD.getPatch(v, $)
+        else
+            lvlgfx = blankgfx
+        end
 
         v.drawScaled(x, y, mapScale, lvlgfx, V_HUDTRANS)
         v.drawString(x + 2*FU, y + 80*FU, Squigglepants.gametypes[map[2]].name, V_HUDTRANS, "fixed")
