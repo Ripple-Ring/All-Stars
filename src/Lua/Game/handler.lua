@@ -9,6 +9,11 @@ addHook("MapChange", function()
         p.squigglepants = nil
     end
 
+    if gametype ~= GT_SQUIGGLEPANTS
+    or not Squigglepants.sync.gametype then
+        return
+    end
+
     local gtDef = Squigglepants.gametypes[Squigglepants.sync.gametype] ---@type SquigglepantsGametype?
     if gtDef then
         gtDef:setup()
@@ -16,6 +21,11 @@ addHook("MapChange", function()
 end)
 
 addHook("MapLoad", function()
+    if gametype ~= GT_SQUIGGLEPANTS
+    or not Squigglepants.sync.gametype then
+        return
+    end
+
     local gtDef = Squigglepants.gametypes[Squigglepants.sync.gametype] ---@type SquigglepantsGametype?
     if gtDef then
         gtDef:onload()

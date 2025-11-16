@@ -20,6 +20,8 @@ mobjinfo[MT_ALLSTARS_FOOD] = {
 
 sfxinfo[sfx_asgrfc].caption = "Eating"
 
+-- TODO: add the 1% thing idk
+
 Squigglepants.addGametype({
     name = "Gourmet Race",
     identifier = "gourmetrace",
@@ -42,15 +44,28 @@ Squigglepants.addGametype({
         mapmusname = "SBBGOR"
         S_ChangeMusic("SBBGOR", true, nil, mapmusflags)
 
-        local foodCount = 0
+        local foodCount, foodTotal = 0, 0
+        local foodList = {}
         for mo in mobjs.iterate() do
             if mo.type == MT_BLUESPHERE
             or mo.type == MT_RING then
-                P_SpawnMobjFromMobj(mo, 0, 0, 0, MT_ALLSTARS_FOOD)
-                P_RemoveMobj(mo)
+                foodTotal = $+1
+                foodList[#foodList+1] = mo
+            end
+        end
+
+        local i = 1
+        while foodCount < foodTotal/4 do
+            if P_RandomChance(FU/2) then
+                P_SpawnMobjFromMobj(foodList[i], 0, 0, 0, MT_ALLSTARS_FOOD)
 
                 foodCount = $+1
             end
+            i = $ < #foodList and $+1 or 1
+        end
+
+        for _, mo in ipairs(foodList) do
+            P_RemoveMobj(mo)
         end
 
         self.food = foodCount
@@ -91,11 +106,12 @@ addHook("MobjThinker", function(mo)
         mo.spriteyoffset = 5*yOffset
     end
 
-    mo.food_yoffset = $ and $+2 or P_RandomFixed()
+    mo.food_yoffset = $ and ($+2) or (P_RandomFixed() * P_RandomRange(1, 10))
 end, MT_ALLSTARS_FOOD)
 
 addHook("TouchSpecial", function(mo, pmo)
     mo.spritexscale, mo.spriteyscale = 2*FU, 2*FU
+
     if (pmo.player and pmo.player.valid) then
         P_GivePlayerRings(pmo.player, 1)
     end
