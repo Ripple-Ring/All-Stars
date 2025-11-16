@@ -259,10 +259,12 @@ local function drawVoteMaps(v, offsetX, offsetY, margin)
 
         local xAdd = -(margin + lvlWidth)
         local textAlign = "fixed"
+        local textAdd = 2*FU
         local yAdd = -(margin + lvlHeight)
         if (i % 2) == 0 then
             xAdd = margin
             textAlign = "fixed-right"
+            textAdd = lvlWidth - 2*FU
         end
         if i > 2 then
             yAdd = margin
@@ -271,7 +273,7 @@ local function drawVoteMaps(v, offsetX, offsetY, margin)
         local x, y = (160*FU + xAdd + offsetX), (100*FU + yAdd + offsetY)
 
         v.drawScaled(x, y, mapScale, lvlgfx)
-        v.drawString(x + 2*FU, y + 80*FU, modeName, 0, textAlign)
+        v.drawString(x + textAdd, y + 80*FU, modeName, 0, textAlign)
     end
     return lvlWidth, lvlHeight
 end
@@ -310,9 +312,10 @@ local function voteHUD(v)
 
     local xAdd = -(mapMargin + lvlWidth)
     local xMul = 1
+    local charAdd = 0
     local yAdd = -(mapMargin + lvlHeight)
     if (mapHovered % 2) == 0 then
-        xAdd = mapMargin + lvlWidth
+        xAdd = lvlWidth
         xMul = -1
     end
     if mapHovered > 2 then
@@ -320,7 +323,6 @@ local function voteHUD(v)
     end
 
     local x, y = (160*FU + xAdd) + 2*FU, (100*FU + yAdd) + 2*FU
-
     for i = 1, 4 do
         if playerList[i] then
             local margin = 2*FU
@@ -329,20 +331,32 @@ local function voteHUD(v)
             end
 
             for _, ip in ipairs(playerList[i]) do ---@param ip squigglepantsPlayer
-                local char = v.getSprite2Patch(ip.skin, SPR2_LIFE)
+                local char
+                local spr2 = SPR2_LIFE
+                while not (char and char.valid) do
+                    char = v.getSprite2Patch(ip.skin, spr2)
+                    spr2 = spr2defaults[$]
+                end
                 local charScale = (skins[ip.skin].flags & SF_HIRES) and skins[ip.skin].highresscale or FU
+                local charAdd = xMul == -1 and -char.width*charScale or 0
 
-                v.drawScaled(x + char.leftoffset*charScale, y + char.topoffset*charScale, charScale, char, V_HUDTRANS, v.getColormap(ip.skin, ip.skincolor))
+                v.drawScaled(x + charAdd + char.leftoffset*charScale, y + char.topoffset*charScale, charScale, char, V_HUDTRANS, v.getColormap(ip.skin, ip.skincolor))
                 x = $ + (char.width*charScale + margin) * xMul
             end
         end
     end
 
     if not vote.selected then
-        local char = v.getSprite2Patch(p.skin, SPR2_LIFE)
+        local char
+        local spr2 = SPR2_LIFE
+        while not (char and char.valid) do
+            char = v.getSprite2Patch(p.skin, spr2)
+            spr2 = spr2defaults[$]
+        end
         local charScale = (skins[p.skin].flags & SF_HIRES) and skins[p.skin].highresscale or FU
+        local charAdd = xMul == -1 and -char.width*charScale or 0
 
-        v.drawScaled(x + char.leftoffset*charScale, y + char.topoffset*charScale, charScale, char, V_HUDTRANS, v.getColormap(TC_DEFAULT, 0, "Squigglepants_EyesOnly"))
+        v.drawScaled(x + charAdd + char.leftoffset*charScale, y + char.topoffset*charScale, charScale, char, V_HUDTRANS, v.getColormap(TC_DEFAULT, 0, "Squigglepants_EyesOnly"))
     end
     
     drawVoteExtras(v, Squigglepants.sync.inttime/TICRATE+1)

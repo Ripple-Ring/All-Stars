@@ -24,13 +24,14 @@ end
 ---@param scale fixed_t?
 ---@param patch patch_t
 ---@param flags number?
-function Squigglepants.HUD.patchFill(v, x, y, width, height, scale, patch, flags)
+---@param colormap colormap?
+function Squigglepants.HUD.patchFill(v, x, y, width, height, scale, patch, flags, colormap)
     if x == nil
     and y == nil
     and width == nil
     and height == nil
     and flags == nil then
-        flags = V_SNAPTOTOP|V_SNAPTOLEFT|V_HUDTRANS
+        flags = V_SNAPTOTOP|V_SNAPTOLEFT
     end
     
     x = $ or 0
@@ -45,17 +46,27 @@ function Squigglepants.HUD.patchFill(v, x, y, width, height, scale, patch, flags
     end
 
     local scrWidth, scrHeight = (v.width() / v.dupx() * FU), (v.height() / v.dupy() * FU)
+
+
     local filledWidth, filledHeight = 0, 0
     local patchWidth, patchHeight = (patch.width * scale), (patch.height * scale)
     while filledWidth < width do
         while filledHeight < height do
-            v.drawScaled(
+            /*v.drawScaled(
                 x + filledWidth, y + filledHeight,
                 scale, patch,
                 flags, nil
+            )*/
+            v.drawCropped(
+                x + filledWidth, y + filledHeight,
+                scale, scale, patch,
+                flags, colormap,
+                0, 0,
+                width - filledWidth, height - filledHeight
             )
 
             filledHeight = $ + patchHeight
+
             if y + filledHeight > scrHeight then break end
         end
         filledHeight = 0

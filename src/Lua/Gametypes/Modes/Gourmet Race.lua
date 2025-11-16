@@ -34,6 +34,10 @@ Squigglepants.addGametype({
         )
     end,
 
+    setup = function(self) ---@param self SquigglepantsGametype
+        self.food = 0
+    end,
+
     onload = function(self) ---@param self SquigglepantsGametype
         mapmusname = "SBBGOR"
         S_ChangeMusic("SBBGOR", true, nil, mapmusflags)
@@ -49,11 +53,20 @@ Squigglepants.addGametype({
             end
         end
 
-        print("there do be like "+foodCount+" foods")
+        self.food = foodCount
     end,
 
     thinker = function(self)
-        
+        if leveltime < 5 then return end
+
+        local totalFood = 0
+        for p in players.iterate do
+            totalFood = $+p.rings
+        end
+
+        if totalFood >= self.food then
+            Squigglepants.endRound()
+        end
     end
 })
 
