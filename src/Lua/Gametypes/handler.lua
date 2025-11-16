@@ -8,6 +8,7 @@ local gametypeDefault = {
     description = nil, ---@type string? The gametype's description, shows up on the Voting Screen.
     color = SKINCOLOR_NONE, ---@type integer? The gametype name's color, active on the Player List & Voting Screen.
     typeoflevel = TOL_COOP|TOL_SQUIGGLEPANTS, ---@type integer? The gametype's TOL_ flags, chooses which type of levels the mode accepts :P
+    blacklist = emptyFunc, ---@type function? Map blacklist for this gametype.
 
     thinker = emptyFunc, ---@type function? ThinkFrame, but only when the gametype is active.<br>- Function has a self argument, representing the gametype's definition.
     preThink = emptyFunc, ---@type function? PreThinkFrame, but only when the gametype is active.<br>- Function has a self argument, representing the gametype's definition.

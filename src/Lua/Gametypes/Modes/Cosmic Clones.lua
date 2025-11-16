@@ -48,6 +48,7 @@ Squigglepants.addGametype({
             Squigglepants.endRound()
             return
         end
+        
         print(self.ringtotal / RING_TOTAL)
     end,
 

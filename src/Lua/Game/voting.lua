@@ -22,7 +22,8 @@ function Squigglepants.getRandomMap(map_blacklist, mode_blacklist)
     while mapnum == nil
     or not mapheaderinfo[mapnum]
     or not (mapheaderinfo[mapnum].typeoflevel & Squigglepants.gametypes[modenum].typeoflevel)
-    or type(map_blacklist) == "function" and map_blacklist(mapnum) do
+    or type(map_blacklist) == "function" and map_blacklist(mapnum)
+    or Squigglepants.gametypes[modenum]:blacklist(mapnum) do
         mapnum = P_RandomRange(1, 1035)
     end
 

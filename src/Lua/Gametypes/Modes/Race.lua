@@ -14,6 +14,12 @@ Squigglepants.addGametype({
         self.placements = {}
     end,
 
+    onload = function(self) ---@param self SquigglepantsGametype
+        for p in players.iterate do
+            p.squigglepants.race_lap = 1
+        end
+    end,
+
     thinker = function(self) ---@param self SquigglepantsGametype
         if leveltime <= COUNTDOWN_TIME then
             if leveltime % TICRATE == 0
@@ -154,7 +160,7 @@ Squigglepants.addGametype({
         end
 
         if self.placements then
-            for key, t in ipairs(self.placements) do ---@param p squigglepantsPlayer
+            for key, t in ipairs(self.placements) do
                 for _, t_p in ipairs(t) do
                     if t_p ~= p then continue end
 
