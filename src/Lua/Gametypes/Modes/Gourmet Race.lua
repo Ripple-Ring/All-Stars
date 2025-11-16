@@ -37,6 +37,7 @@ Squigglepants.addGametype({
     end,
 
     setup = function(self) ---@param self SquigglepantsGametype
+        self.foodPlacements = {}
         self.food = 0
     end,
 
@@ -58,17 +59,21 @@ Squigglepants.addGametype({
         while foodCount < foodTotal/4 do
             if P_RandomChance(FU/2) then
                 P_SpawnMobjFromMobj(foodList[i], 0, 0, 0, MT_ALLSTARS_FOOD)
+                foodList[i].temporarysupercoolgourmetracevariablethatindicatesivespawnedfoodinhereandthuswillnotbeapartofthepossiblespawnlocations = true -- i dont think another mod's gonna use this variable name, ngl
 
                 foodCount = $+1
             end
             i = $ < #foodList and $+1 or 1
         end
 
-        for _, mo in ipairs(foodList) do
+        for k, mo in ipairs(foodList) do
+            if not mo.temporarysupercoolgourmetracevariablethatindicatesivespawnedfoodinhereandthuswillnotbeapartofthepossiblespawnlocations then
+                self.foodPlacements[#self.foodPlacements+1] = {mo.x, mo.y, mo.z}
+            end
             P_RemoveMobj(mo)
         end
 
-        self.food = foodCount
+        self.food = foodTotal
     end,
 
     thinker = function(self)
@@ -100,6 +105,31 @@ addHook("MobjThinker", function(mo)
         return
     end
 
+    if mo.variablenamethatindicatesthatthisfoodisfallingfromthesky then
+        mo.flags = ($|MF_NOCLIPHEIGHT) & ~MF_NOGRAVITY
+        if not mo.helloiamfoodthatfallsandivespawnedalready then
+            mo.z = (mo.subsector.sector.ceilingheight + 500*FU)
+            mo.helloiamfoodthatfallsandivespawnedalready = true
+        end
+
+        local grav = P_GetMobjGravity(mo)
+        mo.momz = $ + grav + grav/2
+
+        if (leveltime % 2) == 0 then
+            for i = 1, 4 do
+                P_SpawnMobjFromMobj(mo, P_RandomRange(-32, 32)*P_RandomFixed(), P_RandomRange(-32, 32)*P_RandomFixed(), P_RandomRange(-20, 20)*P_RandomFixed(), MT_SPINDUST).scale = P_RandomFixed()+FU/2
+            end
+        end
+
+        if mo.z + mo.momz - mo.desiredz <= 0 then
+            mo.variablenamethatindicatesthatthisfoodisfallingfromthesky = false
+            mo.momz = 0
+            mo.z = mo.desiredz
+            mo.flags = ($|MF_NOGRAVITY) & ~MF_NOCLIPHEIGHT
+        end
+        return
+    end
+
     if mo.food_yoffset then
         local yOffset = sin(mo.food_yoffset * ANG1)
 
@@ -115,4 +145,11 @@ addHook("TouchSpecial", function(mo, pmo)
     if (pmo.player and pmo.player.valid) then
         P_GivePlayerRings(pmo.player, 1)
     end
+
+    local gtDef = Squigglepants.gametypes[Squigglepants.sync.gametype]
+    local pos = table.remove(gtDef.foodPlacements, P_RandomRange(1, #gtDef.foodPlacements))
+    local food = P_SpawnMobj(pos[1], pos[2], pos[3], MT_ALLSTARS_FOOD)
+    food.variablenamethatindicatesthatthisfoodisfallingfromthesky = true
+    food.desiredz = pos[3]
+    gtDef.foodPlacements[#gtDef.foodPlacements+1] = {mo.x, mo.y, mo.z}
 end, MT_ALLSTARS_FOOD)
