@@ -152,4 +152,5 @@ addHook("TouchSpecial", function(mo, pmo)
     food.variablenamethatindicatesthatthisfoodisfallingfromthesky = true
     food.desiredz = pos[3]
     gtDef.foodPlacements[#gtDef.foodPlacements+1] = {mo.x, mo.y, mo.z}
+    pmo.state = S_PLAY_GASP
 end, MT_ALLSTARS_FOOD)

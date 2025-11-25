@@ -62,6 +62,16 @@ function Squigglepants.endRound()
 
     if gtDef then
         gtDef:onend()
+
+        if gtDef.hasIntermission then
+            Squigglepants.sync.placements = {}
+            for p in players.iterate do
+                Squigglepants.sync.placements[#Squigglepants.sync.placements+1] = p
+            end
+
+            Squigglepants.sync.placements = Squigglepants.sortTied($, gtDef.placement.comparison, gtDef.placement.value)
+            print(Squigglepants.sync.placements[1][1].name)
+        end
     end
 end
 

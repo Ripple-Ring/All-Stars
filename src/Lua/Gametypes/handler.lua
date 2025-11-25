@@ -1,6 +1,10 @@
 
 local function emptyFunc() end
 
+---@class SquigglepantsGametype_placement: table
+---@field comparison function The same as `table.sort`'s `comp` argument.
+---@field value function<player_t>? The value ties are handled with. Should return a value, preferably part of the player's userdata.
+
 ---@class SquigglepantsGametype: table
 local gametypeDefault = {
     name = "UNDEFINED", ---@type string The gametype's name, shows up on the Player List & Voting Screen.
@@ -18,11 +22,10 @@ local gametypeDefault = {
     onend = emptyFunc, ---@type function? Triggered on end of mode, so when intermission / voting starts.<br>- Function has a self argument, representing the gametype's definition.
 
     gameHUD = emptyFunc, ---@type function? A normal "game" type HUD hook, but only when the gametype is active.<br><br>Check the [wiki's page](https://wiki.srb2.org/wiki/Lua/Functions#HUD_hooks) for more information..<br>- Function has a self argument, representing the gametype's definition.
-    intermission = emptyFunc, ---@type function? This mode's intermission HUD function, skips directly to vote if none is given..<br>- Function has a self argument, representing the gametype's definition.
+    placement = nil, ---@type SquigglepantsGametype_placement?
     hasIntermission = nil ---@type boolean? Does this mode have an intermission? Automatically set based on if there's an intermission HUD set or not.
 }
-
--- table with all the gametypes added.<br>
+-- table with all the gametypes added. <br>
 -- not recommended to directly modify this, but do whatever u want
 Squigglepants.gametypes = {} ---@type table<SquigglepantsGametype>
 
@@ -54,7 +57,7 @@ function Squigglepants.addGametype(definition)
         rawset(_G, idName, idNum)
     end
 
-    local hasIntermission = type(definition.intermission) == "function"
+    local hasIntermission = type(definition.placement) == "table"
     
     setmetatable(definition, gtMeta)
     local defMeta = {

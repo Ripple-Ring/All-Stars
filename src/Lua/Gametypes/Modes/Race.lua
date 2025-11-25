@@ -187,5 +187,15 @@ Squigglepants.addGametype({
                 end
             end
         end
-    end
+    end,
+
+    placement = { ---@type SquigglepantsGametype_placement
+        comparison = function(a, b)
+            return a.realtime < b.realtime
+        end,
+
+        value = function(p)
+            return p.realtime
+        end
+    }
 })

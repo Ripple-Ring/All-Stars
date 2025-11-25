@@ -43,3 +43,31 @@ function Squigglepants.find(t, val)
     end
     return false
 end
+
+function Squigglepants.sortTied(t, sortFunc, valFunc)
+    local canSort = (type(sortFunc) == "function")
+    if canSort then
+        table.sort(t, sortFunc)
+    end
+    
+    local newTable = {}
+    local valList = {}
+    for _, val in ipairs(t) do
+        local trueVal = val
+        if type(valFunc) == "function" then
+            local newVal = valFunc(val)
+            if newVal ~= nil then
+                trueVal = valFunc(val)
+            end
+        end
+
+        if valList[trueVal] then
+            valList[trueVal][#valList[trueVal]+1] = val
+        else
+            table.insert(newTable, {val})
+            valList[trueVal] = newTable[#newTable]
+        end
+    end
+    
+    return newTable
+end
