@@ -15,7 +15,7 @@ mobjinfo[MT_ALLSTARS_FOOD] = {
     reactiontime = MT_ALLSTARS_FOOD,
     radius = 24*FU,
     height = 40*FU,
-    flags = MF_NOGRAVITY|MF_SPECIAL,
+    flags = MF_NOGRAVITY|MF_NOCLIPHEIGHT|MF_SPECIAL,
 }
 
 sfxinfo[sfx_asgrfc].caption = "Eating"
