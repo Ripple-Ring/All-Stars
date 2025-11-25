@@ -20,7 +20,7 @@ mobjinfo[MT_ALLSTARS_FOOD] = {
 
 sfxinfo[sfx_asgrfc].caption = "Eating"
 
--- TODO: add the 1% thing idk
+local TIMELIMIT = 60*TICRATE -- plus a 5 second window so people have Time to see the title card :D
 
 Squigglepants.addGametype({
     name = "Gourmet Race",
@@ -77,14 +77,7 @@ Squigglepants.addGametype({
     end,
 
     thinker = function(self)
-        if leveltime < 5 then return end
-
-        local totalFood = 0
-        for p in players.iterate do
-            totalFood = $+p.rings
-        end
-
-        if totalFood >= self.food then
+        if leveltime > TIMELIMIT + 5*TICRATE then
             Squigglepants.endRound()
         end
     end,
