@@ -49,5 +49,4 @@ dofile("Game/voting.lua")
 
 dofile("Gametypes/handler.lua")
 dofile("Gametypes/Modes/Race.lua")
-dofile("Gametypes/Modes/Cosmic Clones.lua")
 dofile("Gametypes/Modes/Gourmet Race.lua")
