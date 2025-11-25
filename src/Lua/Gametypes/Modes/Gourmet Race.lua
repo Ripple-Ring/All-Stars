@@ -87,7 +87,17 @@ Squigglepants.addGametype({
         if totalFood >= self.food then
             Squigglepants.endRound()
         end
-    end
+    end,
+
+    placement = { ---@type SquigglepantsGametype_placement
+        comparison = function(a, b)
+            return a.rings < b.rings
+        end,
+
+        value = function(p)
+            return p.rings
+        end
+    }
 })
 
 addHook("MobjSpawn", function(mo)

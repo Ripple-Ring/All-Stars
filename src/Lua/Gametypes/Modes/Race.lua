@@ -9,7 +9,6 @@ Squigglepants.addGametype({
     setup = function(self) ---@param self SquigglepantsGametype
         self.leveltime = 0
 
-        self.winnerList = {}
         self.checkpointList = {}
         self.placements = {}
     end,
@@ -121,34 +120,6 @@ Squigglepants.addGametype({
         end
     end,
 
-    onend = function(self) ---@param self SquigglepantsGametype
-        local temp_winnerList = {}
-        for p in players.iterate do
-            temp_winnerList[#temp_winnerList+1] = p
-        end
-
-        table.sort(temp_winnerList, function(a, b)
-            return a.realtime < b.realtime
-        end)
-
-        local trueKey = 1
-        local prevPlyr
-        for _, p in ipairs(temp_winnerList) do
-            if not (p and p.valid) then continue end
-
-            if (prevPlyr and prevPlyr.valid)
-            and prevPlyr.realtime == p.realtime then
-                table.insert(self.winnerList[trueKey-1], p)
-                prevPlyr = p
-                continue
-            end
-
-            self.winnerList[trueKey] = {p}
-            prevPlyr = p
-            trueKey = $+1
-        end
-    end,
-
     ---@param v videolib
     ---@param p player_t
     gameHUD = function(self, v, p)
@@ -170,23 +141,6 @@ Squigglepants.addGametype({
             end
         end
         v.drawString(320 - 16, 200 - 28, (p.starpostnum + 1)+"/"+(#self.checkpointList), V_SNAPTOBOTTOM|V_SNAPTORIGHT|V_PERPLAYER, "right")
-    end,
-
-    intermission = function(self, v) ---@param v videolib
-        local yPos = 0
-        local plyrPos = 1
-        for key, t in ipairs(self.winnerList) do ---@param p squigglepantsPlayer
-            for _, p in ipairs(t) do
-                if not (p and p.valid) then continue end
-
-                v.drawString(8, 8 + 12 * yPos, plyrPos + "- " + p.name, 0, "thin")
-                yPos = $+1
-
-                if plyrPos ~= key then
-                    plyrPos = key - (#self.winnerList[key-1] - 1)
-                end
-            end
-        end
     end,
 
     placement = { ---@type SquigglepantsGametype_placement
