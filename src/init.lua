@@ -27,9 +27,10 @@ rawset(_G, "Squigglepants", { -- and our variable! below is also variable stuff
 })
 
 rawset(_G, "SST_NONE", -1)
-rawset(_G, "SST_INTERMISSION", 0)
-rawset(_G, "SST_VOTE", 1)
-rawset(_G, "SST_ROULETTE", 2)
+rawset(_G, "SST_INTERTRANS", 0) -- INTERmission TRANSition :D / or you could say that.... inter is transgender ?????? :OOOO
+rawset(_G, "SST_INTERMISSION", 1)
+rawset(_G, "SST_VOTE", 2)
+rawset(_G, "SST_ROULETTE", 3)
 
 addHook("NetVars", function(net)
 	Squigglepants.sync = net($)

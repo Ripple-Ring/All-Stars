@@ -111,6 +111,7 @@ Squigglepants.addGametype({
             p.realtime = self.leveltime
 
             if P_PlayerTouchingSectorSpecialFlag(p, SSF_EXIT) then
+                P_PlayJingleMusic(p, "KSSWNS", 0, false)
                 P_DoPlayerFinish(p)
                 
                 if G_EnoughPlayersFinished() then

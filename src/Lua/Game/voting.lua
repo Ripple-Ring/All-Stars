@@ -4,8 +4,10 @@
 -- returns the voting screen's HUD stuff :P
 
 local hook = Squigglepants.Hooks
+
 local inttime = CV_FindVar("inttime")
 local roulettetime = 10 * TICRATE
+local fadeTime = TICRATE
 
 ---Gets a random map. Capable of blacklisting maps & gamemodes
 ---@param map_blacklist function?
@@ -32,8 +34,8 @@ end
 
 --- ends the round :P
 function Squigglepants.endRound()
-    mapmusname = "KARSRE"
-    S_ChangeMusic(mapmusname, true)
+    mapmusname = "KSSWAI"
+    S_ChangeMusic(mapmusname, true, nil, 0, 0, 500)
     Squigglepants.sync.gamestate = SST_INTERMISSION
 
     for mo in mobjs.iterate() do
@@ -49,6 +51,9 @@ function Squigglepants.endRound()
     local div = (gtDef and gtDef.hasIntermission) and 2 or 1
 
     Squigglepants.sync.inttime = inttime.value*TICRATE / div
+    if div == 2 then
+        Squigglepants.sync.inttime = $ + fadeTime
+    end
     Squigglepants.sync.voteMaps = {}
     local foundMaps = {}
     for i = 1, 3 do
@@ -124,6 +129,9 @@ addHook("PreThinkFrame", function()
 
     if Squigglepants.sync.inttime <= 0 then
         if Squigglepants.sync.gamestate == SST_INTERMISSION then
+            mapmusname = "KARSRE"
+            S_ChangeMusic(mapmusname, true, nil, 0, 0, 500)
+
             Squigglepants.sync.inttime = inttime.value*TICRATE / 2
             Squigglepants.sync.gamestate = SST_VOTE
         elseif Squigglepants.sync.gamestate == SST_VOTE then
@@ -219,6 +227,46 @@ hook.addHook("PrePlayerThink", function(p)
     p.cmd.sidemove = 0
     p.cmd.buttons = 0
 end)
+
+---@param v videolib
+local function resultsHUD(self, v)
+    /* if Squigglepants.sync.inttime > inttime.value * TICRATE/2 then
+        local timeLeft = fadeTime - (Squigglepants.sync.inttime - (inttime.value * TICRATE/2))
+
+        local strength = 0
+        if timeLeft > fadeTime/2 then
+            strength = ease.linear(FixedDiv(timeLeft, fadeTime/2), 0, 32*FU) / FU -- maths.
+        else
+            strength = ease.linear(FixedDiv(timeLeft - fadeTime/2, fadeTime/2), 32*FU, 0) / FU -- maths.
+        end
+
+        v.fadeScreen(0xFF00, strength)
+        return
+    end */
+
+    local mapPicture = G_BuildMapName(gamemap) + "P"
+    mapPicture = v.patchExists($) and Squigglepants.HUD.getPatch(v, $) or Squigglepants.HUD.getPatch(v, "BLANKLVL") ---@type patch_t
+
+    v.drawScaled(320*FU - mapPicture.width * (FU - FU/3), 0, FU - FU/3, mapPicture, V_SNAPTORIGHT|V_SNAPTOTOP)
+
+    local yPos = 0
+    local plyrPos = 1
+    local truePos = 1
+    for key, t in ipairs(Squigglepants.sync.placements) do ---@param p squigglepantsPlayer
+        for _, p in ipairs(t) do
+            if not (p and p.valid) then continue end
+
+            if plyrPos ~= key then
+                plyrPos = truePos
+            end
+
+            v.drawString(8, 8 + 12 * yPos, plyrPos + "- " + p.name + ": " + self.placement.value(p), 0, "thin")
+            yPos = $+1
+
+            truePos = $+1
+        end
+    end
+end
 
 local scrollTime = 8 * TICRATE
 local bgScale = FU
@@ -416,9 +464,13 @@ local function rouletteHUD(v)
             local lvlWidth, lvlHeight = (lvlgfx.width * mapScale), (lvlgfx.height * mapScale)
 
             local xAdd = -(mapMargin + lvlWidth)
+            local textAlign = "fixed"
+            local textAdd = 2*FU
             local yAdd = -(mapMargin + lvlHeight)
             if (i % 2) == 0 then
                 xAdd = mapMargin
+                textAlign = "fixed-right"
+                textAdd = lvlWidth - 2*FU
             end
             if i > 2 then
                 yAdd = mapMargin
@@ -426,8 +478,8 @@ local function rouletteHUD(v)
 
             local x, y = 160*FU + ease.insine(time, xAdd, -(mapMargin + lvlWidth/2)), 100*FU + ease.insine(time, yAdd, -(mapMargin + lvlHeight/2))
 
-            v.drawScaled(x, y, mapScale, lvlgfx, V_HUDTRANS)
-            v.drawString(x + 2*FU, y + 80*FU, modeName, V_HUDTRANS, "fixed")
+            v.drawScaled(x, y, mapScale, lvlgfx)
+            v.drawString(x + textAdd, y + 80*FU, modeName, 0, textAlign)
         end
     elseif timeleft < (pre_centerWait + centerTime + centerWait + mysteryTime + mysteryWait) then
         local time = min(FixedDiv(timeleft - (pre_centerWait + centerTime + centerWait), mysteryTime), FU)
@@ -437,7 +489,7 @@ local function rouletteHUD(v)
 
         local x, y = (160*FU - blankgfx.width*mapScale/2) + xOffset, (100*FU - blankgfx.height*mapScale/2) + yOffset
         v.drawScaled(x, y, mapScale, blankgfx, V_HUDTRANS)
-        v.drawString(x + 2*FU, y + 80*FU, "???", V_HUDTRANS, "fixed")
+        v.drawString(x + (blankgfx.width*mapScale - 2*FU), y + 80*FU, "???", V_HUDTRANS, "fixed-right")
 
         local trans = (v.userTransFlag() >> V_ALPHASHIFT) + FixedRound(ease.insine(time, 10*FU, 0))/FU
 
@@ -462,7 +514,7 @@ local function rouletteHUD(v)
         end
 
         v.drawScaled(x, y, mapScale, lvlgfx, V_HUDTRANS)
-        v.drawString(x + 2*FU, y + 80*FU, Squigglepants.gametypes[map[2]].name, V_HUDTRANS, "fixed")
+        v.drawString(x + (blankgfx.width*mapScale - 2*FU), y + 80*FU, Squigglepants.gametypes[map[2]].name, V_HUDTRANS, "fixed-right")
         local trans = (v.userTransFlag() >> V_ALPHASHIFT) + FixedRound(ease.insine(time, 0, 10*FU))/FU
 
         if trans >= 10 then return end
@@ -471,4 +523,4 @@ local function rouletteHUD(v)
     end
 end
 
-return voteHUD, rouletteHUD
+return resultsHUD, voteHUD, rouletteHUD

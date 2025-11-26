@@ -139,7 +139,7 @@ addHook("PlayerThink", function(p)
     end
 end)
 
-local voteHUD, rouletteHUD = Squigglepants.dofile("Game/voting.lua") ---@type function, function
+local resultsHUD, voteHUD, rouletteHUD = Squigglepants.dofile("Game/voting.lua") ---@type function, function, function
 
 -- handle intermission/vote HUD stuff
 customhud.SetupItem("Squigglepants_Intermission", "Squigglepants", function(v)
@@ -152,23 +152,7 @@ customhud.SetupItem("Squigglepants_Intermission", "Squigglepants", function(v)
     local gamestate = Squigglepants.sync.gamestate
 
     if gamestate == SST_INTERMISSION then
-        local yPos = 0
-        local plyrPos = 1
-        local truePos = 1
-        for key, t in ipairs(Squigglepants.sync.placements) do ---@param p squigglepantsPlayer
-            for _, p in ipairs(t) do
-                if not (p and p.valid) then continue end
-
-                if plyrPos ~= key then
-                    plyrPos = truePos
-                end
-
-                v.drawString(8, 8 + 12 * yPos, plyrPos + "- " + p.name + ": " + gtDef.placement.value(p), 0, "thin")
-                yPos = $+1
-
-                truePos = $+1
-            end
-        end
+        resultsHUD(gtDef, v)
     elseif gamestate == SST_VOTE then
         voteHUD(v)
     elseif gamestate == SST_ROULETTE then

@@ -42,8 +42,8 @@ Squigglepants.addGametype({
     end,
 
     onload = function(self) ---@param self SquigglepantsGametype
-        mapmusname = "SBBGOR"
-        S_ChangeMusic("SBBGOR", true, nil, mapmusflags)
+        mapmusname = "KARSGR"
+        S_ChangeMusic(mapmusname, true, nil, mapmusflags)
 
         local foodCount, foodTotal = 0, 0
         local foodList = {}
@@ -66,7 +66,7 @@ Squigglepants.addGametype({
             i = $ < #foodList and $+1 or 1
         end
 
-        for k, mo in ipairs(foodList) do
+        for _, mo in ipairs(foodList) do
             if not mo.temporarysupercoolgourmetracevariablethatindicatesivespawnedfoodinhereandthuswillnotbeapartofthepossiblespawnlocations then
                 self.foodPlacements[#self.foodPlacements+1] = {mo.x, mo.y, mo.z}
             end
