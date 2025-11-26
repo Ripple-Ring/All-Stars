@@ -265,12 +265,15 @@ local function resultsHUD(self, v)
     mapPicture = v.patchExists($) and Squigglepants.HUD.getPatch(v, $) or Squigglepants.HUD.getPatch(v, "BLANKLVL") ---@type patch_t
 
     local gfxScale = FU/2
-    v.drawFill(0, 0, v.width() / v.dupx(), mapPicture.height * gfxScale / FU, 15|V_SNAPTOTOP|V_SNAPTOLEFT)
+    local stripHeight = mapPicture.height * (gfxScale/2) / FU
+    v.drawFill(0, 0, v.width() / v.dupx(), stripHeight, 15|V_SNAPTOTOP|V_SNAPTOLEFT)
+
+    -- TODO: figure out a good cropping method for the line; gfx doesn't work for intended thingie
     v.drawScaled(320*FU - mapPicture.width * gfxScale, 0, gfxScale, mapPicture, V_SNAPTORIGHT|V_SNAPTOTOP)
-    v.drawScaled(320*FU - mapPicture.width * gfxScale, 0, gfxScale, Squigglepants.HUD.getPatch(v, "MAPCUT"), V_SNAPTORIGHT|V_SNAPTOTOP)
 
-    v.drawString(8, 8, G_BuildMapTitle(gamemap), V_SNAPTOTOP|V_SNAPTOLEFT)
+    v.drawString(8, 8, Squigglepants.gametypes[Squigglepants.sync.gametype].name + " - " + G_BuildMapTitle(gamemap), V_SNAPTOTOP|V_SNAPTOLEFT|V_ALLOWLOWERCASE)
 
+    local x = 8
     local yPos = 0
     local plyrPos = 1
     local truePos = 1
@@ -279,10 +282,15 @@ local function resultsHUD(self, v)
         for _, p in ipairs(t) do
             if not (p and p.valid) then continue end
 
-            v.drawString(8, mapPicture.height * gfxScale / FU + 8 + 12 * yPos, plyrPos + "- " + p.name + ": " + self.placement.value(p), 0, "thin")
+            v.drawString(x, stripHeight + 8 + 12 * yPos, plyrPos + "- " + p.name + ": " + self.placement.value(p), 0, "thin")
             yPos = $+1
 
             truePos = $+1
+
+            if (stripHeight + 8 + 12 * yPos > 200) then
+                yPos = 0
+                x = 100
+            end
         end
     end
 end
