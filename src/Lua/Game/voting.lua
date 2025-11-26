@@ -228,6 +228,21 @@ hook.addHook("PrePlayerThink", function(p)
     p.cmd.buttons = 0
 end)
 
+local scrollTime = 8 * TICRATE
+local bgScale = FU
+local mapScale = tofixed("0.95")
+local mapMargin = 4 * FU
+
+---@param v videolib
+local function drawVoteBG(v)
+    local patch = Squigglepants.HUD.getPatch(v, "SRB2BACK")
+    local time = FixedDiv(leveltime % scrollTime, scrollTime)
+    local x = ease.linear(time, -patch.width * bgScale, 0)
+    local y = ease.linear(time, -patch.height * bgScale, 0)
+
+    Squigglepants.HUD.patchFill(v, x, y, nil, nil, bgScale, patch)
+end
+
 ---@param v videolib
 local function resultsHUD(self, v)
     /* if Squigglepants.sync.inttime > inttime.value * TICRATE/2 then
@@ -243,6 +258,8 @@ local function resultsHUD(self, v)
         v.fadeScreen(0xFF00, strength)
         return
     end */
+
+    drawVoteBG(v)
 
     local mapPicture = G_BuildMapName(gamemap) + "P"
     mapPicture = v.patchExists($) and Squigglepants.HUD.getPatch(v, $) or Squigglepants.HUD.getPatch(v, "BLANKLVL") ---@type patch_t
@@ -266,21 +283,6 @@ local function resultsHUD(self, v)
             truePos = $+1
         end
     end
-end
-
-local scrollTime = 8 * TICRATE
-local bgScale = FU
-local mapScale = tofixed("0.95")
-local mapMargin = 4 * FU
-
----@param v videolib
-local function drawVoteBG(v)
-    local patch = Squigglepants.HUD.getPatch(v, "SRB2BACK")
-    local time = FixedDiv(leveltime % scrollTime, scrollTime)
-    local x = ease.linear(time, -patch.width * bgScale, 0)
-    local y = ease.linear(time, -patch.height * bgScale, 0)
-
-    Squigglepants.HUD.patchFill(v, x, y, nil, nil, bgScale, patch)
 end
 
 ---@param v videolib
