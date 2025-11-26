@@ -264,20 +264,22 @@ local function resultsHUD(self, v)
     local mapPicture = G_BuildMapName(gamemap) + "P"
     mapPicture = v.patchExists($) and Squigglepants.HUD.getPatch(v, $) or Squigglepants.HUD.getPatch(v, "BLANKLVL") ---@type patch_t
 
-    v.drawScaled(320*FU - mapPicture.width * (FU - FU/3), 0, FU - FU/3, mapPicture, V_SNAPTORIGHT|V_SNAPTOTOP)
+    local gfxScale = FU/2
+    v.drawFill(0, 0, v.width() / v.dupx(), mapPicture.height * gfxScale / FU, 15|V_SNAPTOTOP|V_SNAPTOLEFT)
+    v.drawScaled(320*FU - mapPicture.width * gfxScale, 0, gfxScale, mapPicture, V_SNAPTORIGHT|V_SNAPTOTOP)
+    v.drawScaled(320*FU - mapPicture.width * gfxScale, 0, gfxScale, Squigglepants.HUD.getPatch(v, "MAPCUT"), V_SNAPTORIGHT|V_SNAPTOTOP)
+
+    v.drawString(8, 8, G_BuildMapTitle(gamemap), V_SNAPTOTOP|V_SNAPTOLEFT)
 
     local yPos = 0
     local plyrPos = 1
     local truePos = 1
-    for key, t in ipairs(Squigglepants.sync.placements) do ---@param p squigglepantsPlayer
+    for _, t in ipairs(Squigglepants.sync.placements) do ---@param p squigglepantsPlayer
+        plyrPos = truePos
         for _, p in ipairs(t) do
             if not (p and p.valid) then continue end
 
-            if plyrPos ~= key then
-                plyrPos = truePos
-            end
-
-            v.drawString(8, 8 + 12 * yPos, plyrPos + "- " + p.name + ": " + self.placement.value(p), 0, "thin")
+            v.drawString(8, mapPicture.height * gfxScale / FU + 8 + 12 * yPos, plyrPos + "- " + p.name + ": " + self.placement.value(p), 0, "thin")
             yPos = $+1
 
             truePos = $+1
