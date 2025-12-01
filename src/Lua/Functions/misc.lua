@@ -85,9 +85,9 @@ function Squigglepants.changeMusic(musicname, looping, player, mflags, position,
     if Squigglepants.altMusic[musicname]
     and P_RandomChance(FU/10) then
         if type(Squigglepants.altMusic[musicname]) == "table" then
-            local musicnum = P_RandomRange(0, #Squigglepants.altMusic[musicname])
+            local musicnum = P_RandomRange(1, #Squigglepants.altMusic[musicname])
             musicname = Squigglepants.altMusic[musicname][musicnum] or $
-        elseif P_RandomChance(FU/2) then
+        else
             musicname = Squigglepants.altMusic[musicname]
         end
     end
