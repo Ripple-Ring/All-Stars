@@ -24,6 +24,7 @@ local TIMELIMIT = 60*TICRATE -- plus a 5 second window so people have Time to se
 
 Squigglepants.addGametype({
     name = "Gourmet Race",
+    color = SKINCOLOR_BUBBLEGUM,
     identifier = "gourmetrace",
     typeoflevel = TOL_COOP,
 

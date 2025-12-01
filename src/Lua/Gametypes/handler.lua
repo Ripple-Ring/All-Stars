@@ -16,6 +16,7 @@ local gametypeDefault = {
 
     thinker = emptyFunc, ---@type function? ThinkFrame, but only when the gametype is active.<br>- Function has a self argument, representing the gametype's definition.
     preThink = emptyFunc, ---@type function? PreThinkFrame, but only when the gametype is active.<br>- Function has a self argument, representing the gametype's definition.
+    playerSpawn = emptyFunc, ---@type function? PlayerSpawn, but only when the gametype is active.<br>- Function has a self argument, representing the gametype's definition.
     playerThink = emptyFunc, ---@type function? PlayerThink, but only when the gametype is active.<br>- Function has a self argument, representing the gametype's definition.
     setup = emptyFunc, ---@type function? MapChange, but only when the gametype is active.<br>- Function has a self argument, representing the gametype's definition.
     onload = emptyFunc, ---@type function? MapLoad, but only when the gametype is active.<br>- Function has a self argument, representing the gametype's definition.
@@ -121,6 +122,22 @@ addHook("PreThinkFrame", function()
     end
 end)
 
+---@param p player_t
+addHook("PlayerSpawn", function(p)
+    if gametype ~= GT_SQUIGGLEPANTS
+    or not Squigglepants.sync.gametype then
+        return
+    end
+
+    local gtDef = Squigglepants.gametypes[Squigglepants.sync.gametype] ---@type SquigglepantsGametype
+    if not gtDef then
+        return
+    end
+
+    if Squigglepants.sync.gamestate == SST_NONE then
+        gtDef:playerSpawn(p)
+    end
+end)
 
 ---@param p player_t
 addHook("PlayerThink", function(p)

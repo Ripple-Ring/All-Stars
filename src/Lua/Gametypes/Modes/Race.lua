@@ -1,8 +1,13 @@
 
 local COUNTDOWN_TIME = 4*TICRATE
 
+local function ticsToTimeString(tics)
+    return string.format("%02d:%02d.%02d", G_TicsToMinutes(tics, true), G_TicsToSeconds(tics), G_TicsToCentiseconds(tics))
+end
+
 Squigglepants.addGametype({
     name = "Race",
+    color = SKINCOLOR_AZURE,
     identifier = "race",
     description = "its race",
     typeoflevel = TOL_RACE,
@@ -16,6 +21,7 @@ Squigglepants.addGametype({
     onload = function(self) ---@param self SquigglepantsGametype
         for p in players.iterate do
             p.squigglepants.race_lap = 1
+            p.squigglepants.race_time = 0
         end
     end,
 
@@ -108,7 +114,10 @@ Squigglepants.addGametype({
 
         if not (p.pflags & PF_FINISHED)
         and not p.exiting then
-            p.realtime = self.leveltime
+            if p.squigglepants then
+                p.squigglepants.race_time = self.leveltime
+                p.realtime = p.squigglepants.race_time
+            end
 
             if P_PlayerTouchingSectorSpecialFlag(p, SSF_EXIT) then
                 P_PlayJingleMusic(p, "KSSWNS", 0, false)
@@ -146,11 +155,11 @@ Squigglepants.addGametype({
 
     placement = { ---@type SquigglepantsGametype_placement
         comparison = function(a, b)
-            return a.realtime < b.realtime
+            return (a.squigglepants and b.squigglepants) and a.squigglepants.race_time < b.squigglepants.race_time
         end,
 
         value = function(p)
-            return p.realtime
+            return ticsToTimeString(p.squigglepants.race_time)
         end
     }
 })

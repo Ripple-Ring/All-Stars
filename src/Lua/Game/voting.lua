@@ -7,7 +7,7 @@ local hook = Squigglepants.Hooks
 
 local inttime = CV_FindVar("inttime")
 local roulettetime = 10 * TICRATE
-local fadeTime = TICRATE
+local fadeTime = 2*TICRATE
 
 ---Gets a random map. Capable of blacklisting maps & gamemodes
 ---@param map_blacklist function?
@@ -228,7 +228,9 @@ end)
 
 local scrollTime = 8 * TICRATE
 local bgScale = FU
+
 local mapScale = tofixed("0.95")
+local lvlWidth, lvlHeight = (160 * mapScale), (100 * mapScale)
 local mapMargin = 4 * FU
 
 ---@param v videolib
@@ -243,54 +245,95 @@ end
 
 ---@param v videolib
 local function resultsHUD(self, v)
-    /* if Squigglepants.sync.inttime > inttime.value * TICRATE/2 then
-        local timeLeft = fadeTime - (Squigglepants.sync.inttime - (inttime.value * TICRATE/2))
+    local fadeTime_passed = fadeTime - (Squigglepants.sync.inttime - (inttime.value * TICRATE/2))
 
-        local strength = 0
-        if timeLeft > fadeTime/2 then
-            strength = ease.linear(FixedDiv(timeLeft, fadeTime/2), 0, 32*FU) / FU -- maths.
-        else
-            strength = ease.linear(FixedDiv(timeLeft - fadeTime/2, fadeTime/2), 32*FU, 0) / FU -- maths.
-        end
+    if fadeTime_passed > fadeTime/2 then
+        drawVoteBG(v)
 
-        v.fadeScreen(0xFF00, strength)
-        return
-    end */
+        local mapPicture = G_BuildMapName(gamemap) + "P"
+        mapPicture = v.patchExists($) and Squigglepants.HUD.getPatch(v, $) or Squigglepants.HUD.getPatch(v, "BLANKLVL") ---@type patch_t
 
-    drawVoteBG(v)
+        local gfxScale = FU/2
+        local stripHeight = mapPicture.height * (gfxScale/2) / FU
+        v.drawFill(0, 0, v.width() / v.dupx(), stripHeight, 15|V_SNAPTOTOP|V_SNAPTOLEFT)
 
-    local mapPicture = G_BuildMapName(gamemap) + "P"
-    mapPicture = v.patchExists($) and Squigglepants.HUD.getPatch(v, $) or Squigglepants.HUD.getPatch(v, "BLANKLVL") ---@type patch_t
+        -- TODO: figure out a good cropping method for the line; gfx doesn't work for intended thingie
+        v.drawScaled(320*FU - mapPicture.width * gfxScale, 0, gfxScale, mapPicture, V_SNAPTORIGHT|V_SNAPTOTOP)
 
-    local gfxScale = FU/2
-    local stripHeight = mapPicture.height * (gfxScale/2) / FU
-    v.drawFill(0, 0, v.width() / v.dupx(), stripHeight, 15|V_SNAPTOTOP|V_SNAPTOLEFT)
+        v.drawString(8, 8, Squigglepants.gametypes[Squigglepants.sync.gametype].name + " - " + G_BuildMapTitle(gamemap), V_SNAPTOTOP|V_SNAPTOLEFT|V_ALLOWLOWERCASE)
 
-    -- TODO: figure out a good cropping method for the line; gfx doesn't work for intended thingie
-    v.drawScaled(320*FU - mapPicture.width * gfxScale, 0, gfxScale, mapPicture, V_SNAPTORIGHT|V_SNAPTOTOP)
+        local x = 8
+        local yPos = 0
+        local plyrPos = 1
+        local truePos = 1
+        for _, t in ipairs(Squigglepants.sync.placements) do ---@param p squigglepantsPlayer
+            plyrPos = truePos
+            for _, p in ipairs(t) do
+                if not (p and p.valid) then continue end
 
-    v.drawString(8, 8, Squigglepants.gametypes[Squigglepants.sync.gametype].name + " - " + G_BuildMapTitle(gamemap), V_SNAPTOTOP|V_SNAPTOLEFT|V_ALLOWLOWERCASE)
+                v.drawString(x, stripHeight + 8 + 12 * yPos, plyrPos + "- " + p.name + ": " + self.placement.value(p), 0, "thin")
+                yPos = $+1
 
-    local x = 8
-    local yPos = 0
-    local plyrPos = 1
-    local truePos = 1
-    for _, t in ipairs(Squigglepants.sync.placements) do ---@param p squigglepantsPlayer
-        plyrPos = truePos
-        for _, p in ipairs(t) do
-            if not (p and p.valid) then continue end
+                truePos = $+1
 
-            v.drawString(x, stripHeight + 8 + 12 * yPos, plyrPos + "- " + p.name + ": " + self.placement.value(p), 0, "thin")
-            yPos = $+1
-
-            truePos = $+1
-
-            if (stripHeight + 8 + 12 * yPos > 200) then
-                yPos = 0
-                x = 100
+                if (stripHeight + 8 + 12 * yPos > 200) then
+                    yPos = 0
+                    x = 100
+                end
             end
         end
     end
+
+    if fadeTime_passed < fadeTime then
+        local strength = 31
+
+        local fade = 0xFB00 -- to black: 0xFF00 or 0xFA00, first is to black, second is blue-tinted to black
+        if fadeTime_passed > fadeTime - fadeTime/4 then
+            strength = ease.linear(FixedDiv(fadeTime_passed - (fadeTime - fadeTime/4), fadeTime/4), 32*FU, 0) / FU -- maths.
+        elseif fadeTime_passed < fadeTime/4 then
+            strength = ease.linear(FixedDiv(fadeTime_passed, fadeTime/2), 0, 32*FU) / FU -- maths.
+        end
+
+        v.fadeScreen(fade, strength)
+    end
+end
+
+---@param v videolib
+---@param x fixed_t
+---@param y fixed_t
+---@param map integer
+---@param gametype_num integer
+---@param align integer?
+---@return fixed_t
+---@return fixed_t
+local function drawVoteMap(v, x, y, map, gametype_num, align)
+    local lvlgfx, modeName, lvlName = Squigglepants.HUD.getPatch(v, "BLANKLVL"), "???", "???"
+    
+    local textAdd, textSuffix = 2*FU, ""
+    if align == 1 then
+        textAdd, textSuffix = lvlWidth - 2*FU, "-right"
+    end
+
+    if map >= 1 and map <= 1035 then
+        local name = G_BuildMapName(map) + "P"
+        if v.patchExists(name) then
+            lvlgfx = Squigglepants.HUD.getPatch(v, name)
+        end
+
+        lvlName = G_BuildMapTitle(map)
+    end
+        
+    if Squigglepants.gametypes[gametype_num]
+    and Squigglepants.gametypes[gametype_num].name then
+        modeName = Squigglepants.gametypes[gametype_num].name
+    else
+        lvlgfx = Squigglepants.HUD.getPatch(v, "BLANKLVL")
+        modeName = "???"
+    end
+
+    v.drawScaled(x, y, mapScale, lvlgfx)
+    v.drawString(x + textAdd, y + lvlHeight - 8*FU, modeName, 0, "fixed"+textSuffix)
+    v.drawString(x + textAdd, y + lvlHeight - 16*FU, lvlName, 0, "thin-fixed"+textSuffix)
 end
 
 ---@param v videolib
@@ -304,35 +347,21 @@ local function drawVoteMaps(v, offsetX, offsetY, margin)
         margin = mapMargin
     end
 
-    local lvlWidth, lvlHeight
     for i = 1, 4 do
         local map = Squigglepants.sync.voteMaps[i]
-        local lvlgfx
-        local modeName
-        
-        if i < 4 then
-            local name = G_BuildMapName(map[1]) + "P"
-            if v.patchExists(name) then
-                lvlgfx = Squigglepants.HUD.getPatch(v, G_BuildMapName(map[1]) + "P")
-            else
-                lvlgfx = Squigglepants.HUD.getPatch(v, "BLANKLVL")
-            end
-            modeName = Squigglepants.gametypes[map[2]].name
-        else
-            lvlgfx = Squigglepants.HUD.getPatch(v, "BLANKLVL")
-            modeName = "???"
+
+        local mapnum, modenum = unpack(map)
+        if i >= 4 then
+            mapnum = 0
+            modenum = INT32_MAX
         end
 
-        lvlWidth, lvlHeight = (lvlgfx.width * mapScale), (lvlgfx.height * mapScale)
-
         local xAdd = -(margin + lvlWidth)
-        local textAlign = "fixed"
-        local textAdd = 2*FU
+        local align = -1
         local yAdd = -(margin + lvlHeight)
         if (i % 2) == 0 then
             xAdd = margin
-            textAlign = "fixed-right"
-            textAdd = lvlWidth - 2*FU
+            align = 1
         end
         if i > 2 then
             yAdd = margin
@@ -340,10 +369,8 @@ local function drawVoteMaps(v, offsetX, offsetY, margin)
 
         local x, y = (160*FU + xAdd + offsetX), (100*FU + yAdd + offsetY)
 
-        v.drawScaled(x, y, mapScale, lvlgfx)
-        v.drawString(x + textAdd, y + 80*FU, modeName, 0, textAlign)
+       drawVoteMap(v, x, y, mapnum, modenum, align)
     end
-    return lvlWidth, lvlHeight
 end
 
 ---@param v videolib
@@ -375,12 +402,11 @@ local function voteHUD(v)
         end
     end
 
-    local lvlWidth, lvlHeight = drawVoteMaps(v)
+    drawVoteMaps(v)
     local mapHovered = vote.selX + 2*(vote.selY - 1)
 
     local xAdd = -(mapMargin + lvlWidth)
     local xMul = 1
-    local charAdd = 0
     local yAdd = -(mapMargin + lvlHeight)
     if (mapHovered % 2) == 0 then
         xAdd = lvlWidth
@@ -455,32 +481,18 @@ local function rouletteHUD(v)
         local time = min(FixedDiv(timeleft - pre_centerWait, centerTime), FU)
         for i = 1, 4 do
             local map = Squigglepants.sync.voteMaps[i]
-            local lvlgfx
-            local modeName
+            local mapnum, modenum = unpack(map)
             
-            if i < 4 then
-                local name = G_BuildMapName(map[1]) + "P"
-                if v.patchExists(name) then
-                    lvlgfx = Squigglepants.HUD.getPatch(v, name)
-                else
-                    lvlgfx = blankgfx
-                end
-                modeName = Squigglepants.gametypes[map[2]].name
-            else
-                lvlgfx = blankgfx
-                modeName = "???"
+            if i >= 4 then
+                mapnum, modenum = 0, INT32_MAX
             end
 
-            local lvlWidth, lvlHeight = (lvlgfx.width * mapScale), (lvlgfx.height * mapScale)
-
             local xAdd = -(mapMargin + lvlWidth)
-            local textAlign = "fixed"
-            local textAdd = 2*FU
+            local align = -1
             local yAdd = -(mapMargin + lvlHeight)
             if (i % 2) == 0 then
                 xAdd = mapMargin
-                textAlign = "fixed-right"
-                textAdd = lvlWidth - 2*FU
+                align = 1
             end
             if i > 2 then
                 yAdd = mapMargin
@@ -488,8 +500,7 @@ local function rouletteHUD(v)
 
             local x, y = 160*FU + ease.insine(time, xAdd, -(mapMargin + lvlWidth/2)), 100*FU + ease.insine(time, yAdd, -(mapMargin + lvlHeight/2))
 
-            v.drawScaled(x, y, mapScale, lvlgfx)
-            v.drawString(x + textAdd, y + 80*FU, modeName, 0, textAlign)
+            drawVoteMap(v, x, y, mapnum, modenum, align)
         end
     elseif timeleft < (pre_centerWait + centerTime + centerWait + mysteryTime + mysteryWait) then
         local time = min(FixedDiv(timeleft - (pre_centerWait + centerTime + centerWait), mysteryTime), FU)
@@ -498,10 +509,9 @@ local function rouletteHUD(v)
         xOffset, yOffset = ease.inexpo(time, 0, 8*$1), ease.inexpo(time, 0, 8*$2)
 
         local x, y = (160*FU - blankgfx.width*mapScale/2) + xOffset, (100*FU - blankgfx.height*mapScale/2) + yOffset
-        v.drawScaled(x, y, mapScale, blankgfx, V_HUDTRANS)
-        v.drawString(x + (blankgfx.width*mapScale - 2*FU), y + 80*FU, "???", V_HUDTRANS, "fixed-right")
+        drawVoteMap(v, x, y, 0, INT32_MAX, 1)
 
-        local trans = (v.userTransFlag() >> V_ALPHASHIFT) + FixedRound(ease.insine(time, 10*FU, 0))/FU
+        local trans = FixedRound(ease.insine(time, 10*FU, 0))/FU
 
         if trans >= 10 then return end
 
@@ -516,16 +526,8 @@ local function rouletteHUD(v)
 
         local map = Squigglepants.sync.selectedMap
 
-        local lvlgfx = G_BuildMapName(map[1]) + "P"
-        if v.patchExists(lvlgfx) then
-            lvlgfx = Squigglepants.HUD.getPatch(v, $)
-        else
-            lvlgfx = blankgfx
-        end
-
-        v.drawScaled(x, y, mapScale, lvlgfx, V_HUDTRANS)
-        v.drawString(x + (blankgfx.width*mapScale - 2*FU), y + 80*FU, Squigglepants.gametypes[map[2]].name, V_HUDTRANS, "fixed-right")
-        local trans = (v.userTransFlag() >> V_ALPHASHIFT) + FixedRound(ease.insine(time, 0, 10*FU))/FU
+        drawVoteMap(v, x, y, map[1], map[2], 1)
+        local trans = FixedRound(ease.insine(time, 0, 10*FU))/FU
 
         if trans >= 10 then return end
 
