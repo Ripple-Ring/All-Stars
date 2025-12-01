@@ -26,6 +26,11 @@ rawset(_G, "Squigglepants", { -- and our variable! below is also variable stuff
 	}
 })
 
+Squigglepants.altMusic = {
+    ["KARSGR"] = "SBBGOR",
+    ["POTANY"] = "PTANNI"
+}
+
 rawset(_G, "SST_NONE", -1)
 rawset(_G, "SST_INTERTRANS", 0) -- INTERmission TRANSition :D / or you could say that.... inter is transgender ?????? :OOOO
 rawset(_G, "SST_INTERMISSION", 1)

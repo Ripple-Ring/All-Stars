@@ -42,8 +42,7 @@ Squigglepants.addGametype({
     end,
 
     onload = function(self) ---@param self SquigglepantsGametype
-        mapmusname = "KARSGR"
-        S_ChangeMusic(mapmusname, true, nil, mapmusflags)
+        mapmusname = Squigglepants.changeMusic("KARSGR", true, nil, mapmusflags)
 
         local foodCount, foodTotal = 0, 0
         local foodList = {}

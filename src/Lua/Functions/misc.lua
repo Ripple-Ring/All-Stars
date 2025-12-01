@@ -71,3 +71,27 @@ function Squigglepants.sortTied(t, sortFunc, valFunc)
     
     return newTable
 end
+
+--- S_ChangeMusic, but it takes alt musics into account 😱😱😱😱<br>
+--- also returns the musicname back, so u can change mapmusname properly if u want to
+---@param musicname string
+---@param looping boolean?
+---@param player player_t?
+---@param mflags integer?
+---@param position integer?
+---@param prefadems integer?
+---@param fadeinms integer?
+function Squigglepants.changeMusic(musicname, looping, player, mflags, position, prefadems, fadeinms)
+    if Squigglepants.altMusic[musicname] then
+        if type(Squigglepants.altMusic[musicname]) == "table" then
+            local musicnum = P_RandomRange(0, #Squigglepants.altMusic[musicname])
+            musicname = Squigglepants.altMusic[musicname][musicnum] or $
+        elseif P_RandomChance(FU/2) then
+            musicname = Squigglepants.altMusic[musicname]
+        end
+    end
+
+    S_ChangeMusic(musicname, looping, player, mflags, position, prefadems, fadeinms)
+
+    return musicname
+end

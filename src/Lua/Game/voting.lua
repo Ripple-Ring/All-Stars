@@ -34,8 +34,7 @@ end
 
 --- ends the round :P
 function Squigglepants.endRound()
-    mapmusname = "KSSWAI"
-    S_ChangeMusic(mapmusname, true, nil, 0, 0, 500)
+    mapmusname = Squigglepants.changeMusic("KSSWAI", true, nil, 0, 0, 500)
     Squigglepants.sync.gamestate = SST_INTERMISSION
 
     for mo in mobjs.iterate() do
@@ -129,8 +128,7 @@ addHook("PreThinkFrame", function()
 
     if Squigglepants.sync.inttime <= 0 then
         if Squigglepants.sync.gamestate == SST_INTERMISSION then
-            mapmusname = "KARSRE"
-            S_ChangeMusic(mapmusname, true, nil, 0, 0, 500)
+            mapmusname = Squigglepants.changeMusic("KARSRE", true, nil, 0, 0, 500)
 
             Squigglepants.sync.inttime = inttime.value*TICRATE / 2
             Squigglepants.sync.gamestate = SST_VOTE
