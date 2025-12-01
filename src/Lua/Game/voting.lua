@@ -237,10 +237,14 @@ local mapMargin = 4 * FU
 local function drawVoteBG(v)
     local patch = Squigglepants.HUD.getPatch(v, "SRB2BACK")
     local time = FixedDiv(leveltime % scrollTime, scrollTime)
+
     local x = ease.linear(time, -patch.width * bgScale, 0)
     local y = ease.linear(time, -patch.height * bgScale, 0)
+    if time > FU then
+        print("HEY")
+    end
 
-    Squigglepants.HUD.patchFill(v, x, y, nil, nil, bgScale, patch)
+    Squigglepants.HUD.patchFill(v, x, y, nil, nil, bgScale, patch, V_SNAPTOTOP|V_SNAPTOLEFT)
 end
 
 ---@param v videolib

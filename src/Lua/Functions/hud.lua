@@ -45,18 +45,12 @@ function Squigglepants.HUD.patchFill(v, x, y, width, height, scale, patch, flags
         height = 999*FU
     end
 
-    local scrWidth, scrHeight = (v.width() / v.dupx() * FU), (v.height() / v.dupy() * FU)
-
+    local scrWidth, scrHeight = (v.width() * FU / v.dupx()), (v.height() * FU / v.dupy())
 
     local filledWidth, filledHeight = 0, 0
     local patchWidth, patchHeight = (patch.width * scale), (patch.height * scale)
     while filledWidth < width do
         while filledHeight < height do
-            /*v.drawScaled(
-                x + filledWidth, y + filledHeight,
-                scale, patch,
-                flags, nil
-            )*/
             v.drawCropped(
                 x + filledWidth, y + filledHeight,
                 scale, scale, patch,
