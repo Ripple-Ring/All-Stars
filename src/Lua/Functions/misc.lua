@@ -82,7 +82,8 @@ end
 ---@param prefadems integer?
 ---@param fadeinms integer?
 function Squigglepants.changeMusic(musicname, looping, player, mflags, position, prefadems, fadeinms)
-    if Squigglepants.altMusic[musicname] then
+    if Squigglepants.altMusic[musicname]
+    and P_RandomChance(FU/10) then
         if type(Squigglepants.altMusic[musicname]) == "table" then
             local musicnum = P_RandomRange(0, #Squigglepants.altMusic[musicname])
             musicname = Squigglepants.altMusic[musicname][musicnum] or $
