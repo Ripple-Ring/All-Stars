@@ -5,6 +5,9 @@ local function ticsToTimeString(tics)
     return string.format("%02d:%02d.%02d", G_TicsToMinutes(tics, true), G_TicsToSeconds(tics), G_TicsToCentiseconds(tics))
 end
 
+sfxinfo[freeslot("sfx_kar1pl")].caption = "your wiener"
+sfxinfo[freeslot("sfx_karoth")].caption = "someone wiener"
+
 Squigglepants.addGametype({
     name = "Race",
     color = SKINCOLOR_AZURE,
@@ -120,7 +123,10 @@ Squigglepants.addGametype({
             end
 
             if P_PlayerTouchingSectorSpecialFlag(p, SSF_EXIT) then
-                P_PlayJingleMusic(p, "KSSWNS", 0, false)
+                S_StartSound(nil, sfx_kar1pl, p)
+                if not P_IsLocalPlayer(p) then
+                    S_StartSound(nil, sfx_karoth, p)
+                end
                 P_DoPlayerFinish(p)
                 
                 if G_EnoughPlayersFinished() then

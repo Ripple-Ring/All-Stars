@@ -9,6 +9,9 @@ local inttime = CV_FindVar("inttime")
 local roulettetime = 10 * TICRATE
 local fadeTime = 2*TICRATE
 
+sfxinfo[freeslot("sfx_kirlon")].caption = "you win!!!"
+sfxinfo[freeslot("sfx_kirsho")].caption = "you tried"
+
 ---Gets a random map. Capable of blacklisting maps & gamemodes
 ---@param map_blacklist function?
 ---@param mode_blacklist function?
@@ -216,6 +219,26 @@ hook.addHook("PrePlayerThink", function(p)
             vote.selected = false
             S_StartSound(nil, sfx_notadd, p)
         end
+    elseif Squigglepants.sync.gamestate == SST_INTERMISSION
+    and Squigglepants.sync.inttime == (inttime.value * TICRATE/2) then
+        local position = -1
+        local plyrPos = 1
+        local truePos = 1
+        for _, t in ipairs(Squigglepants.sync.placements) do
+            plyrPos = truePos
+            for _, np in ipairs(t) do
+                if np == p then
+                    position = plyrPos
+                    break 2
+                end
+                truePos = $+1
+            end
+        end
+
+        local sfx = position == 1 and sfx_kirlon or sfx_kirsho
+        S_StartSound(nil, sfx, p)
+        mapmusname = ""
+        S_ChangeMusic("", true, p)
     end
 
     vote.lastcmd.forwardmove = p.cmd.forwardmove
@@ -240,9 +263,6 @@ local function drawVoteBG(v)
 
     local x = ease.linear(time, -patch.width * bgScale, 0)
     local y = ease.linear(time, -patch.height * bgScale, 0)
-    if time > FU then
-        print("HEY")
-    end
 
     Squigglepants.HUD.patchFill(v, x, y, nil, nil, bgScale, patch, V_SNAPTOTOP|V_SNAPTOLEFT)
 end
