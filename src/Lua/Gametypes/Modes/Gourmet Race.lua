@@ -100,7 +100,7 @@ Squigglepants.addGametype({
 
     placement = { ---@type SquigglepantsGametype_placement
         comparison = function(a, b)
-            return a.rings < b.rings
+            return a.rings > b.rings
         end,
 
         value = function(p)
