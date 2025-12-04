@@ -22,6 +22,17 @@ sfxinfo[sfx_asgrfc].caption = "Eating"
 
 local TIMELIMIT = 60*TICRATE -- plus a 5 second window so people have Time to see the title card :D
 
+local function spawnFood()
+    local gtDef = Squigglepants.gametypes[Squigglepants.sync.gametype]
+
+    if #gtDef.foodPlacements then
+        local pos = table.remove(gtDef.foodPlacements, P_RandomRange(1, #gtDef.foodPlacements))
+        local food = P_SpawnMobj(pos[1], pos[2], pos[3], MT_ALLSTARS_FOOD)
+        food.variablenamethatindicatesthatthisfoodisfallingfromthesky = true
+        food.desiredz = pos[3]
+    end
+end
+
 Squigglepants.addGametype({
     name = "Gourmet Race",
     color = SKINCOLOR_BUBBLEGUM,
@@ -79,6 +90,11 @@ Squigglepants.addGametype({
     thinker = function(self)
         if leveltime > TIMELIMIT + 5*TICRATE then
             Squigglepants.endRound()
+        end
+
+        if leveltime > TIMELIMIT - 10*TICRATE
+        and (leveltime % (TICRATE/4)) == 0 then
+            spawnFood()
         end
     end,
 
@@ -149,11 +165,9 @@ addHook("TouchSpecial", function(mo, pmo)
         P_GivePlayerRings(pmo.player, 1)
     end
 
+    spawnFood()
+
     local gtDef = Squigglepants.gametypes[Squigglepants.sync.gametype]
-    local pos = table.remove(gtDef.foodPlacements, P_RandomRange(1, #gtDef.foodPlacements))
-    local food = P_SpawnMobj(pos[1], pos[2], pos[3], MT_ALLSTARS_FOOD)
-    food.variablenamethatindicatesthatthisfoodisfallingfromthesky = true
-    food.desiredz = pos[3]
     gtDef.foodPlacements[#gtDef.foodPlacements+1] = {mo.x, mo.y, mo.z}
     pmo.state = S_PLAY_GASP
 end, MT_ALLSTARS_FOOD)

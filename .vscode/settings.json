@@ -10,7 +10,8 @@
         "assign-type-mismatch",
         "param-type-mismatch",
         "cast-local-type",
-        "inject-field"
+        "inject-field",
+        "code-after-break"
     ],
     "Lua.diagnostics.ignoredConstantPrefixes":[
         "MT_",

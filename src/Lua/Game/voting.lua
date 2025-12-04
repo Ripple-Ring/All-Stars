@@ -77,7 +77,6 @@ function Squigglepants.endRound()
             end
 
             Squigglepants.sync.placements = Squigglepants.sortTied($, gtDef.placement.comparison, gtDef.placement.value)
-            print(Squigglepants.sync.placements[1][1].name)
         end
     end
 end
