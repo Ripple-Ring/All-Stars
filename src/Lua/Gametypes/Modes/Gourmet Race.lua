@@ -40,12 +40,12 @@ Squigglepants.addGametype({
     typeoflevel = TOL_COOP,
 
     blacklist = function(_, map)
-        return not ( -- TODO: remove nights stages from the possibilities, 2.2 doesn't like those in multiplayer
+        return not (
             map >= sstage_start
             and map <= sstage_end
             or map >= smpstage_start
             and map <= smpstage_end
-        )
+        ) or (mapheaderinfo[map].typeoflevel & TOL_NIGHTS)
     end,
 
     setup = function(self) ---@param self SquigglepantsGametype
