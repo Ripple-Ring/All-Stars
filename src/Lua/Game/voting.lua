@@ -79,6 +79,9 @@ function Squigglepants.endRound()
             Squigglepants.sync.placements = Squigglepants.sortTied($, gtDef.placement.comparison, gtDef.placement.value)
         end
     end
+
+    local quotes = Squigglepants.defaultQuotes -- NOTE: maybe add gametype specific quotes?
+    Squigglepants.sync.curQuote = quotes[P_RandomRange(1, #quotes)]
 end
 
 COM_AddCommand("endround", function()
@@ -93,6 +96,7 @@ COM_AddCommand("squiggle_setgamemode", function(_, arg)
     end
 
     if gt then
+        G_SetCustomExitVars(gamemap, 2)
         G_ExitLevel()
         Squigglepants.sync.gametype = _G["SGT_"+gt.identifier:upper()]
     end
@@ -162,7 +166,7 @@ local function clamp(cur, minval, maxval)
     return min(max(cur, minval), maxval)
 end
 
----@param p squigglepantsPlayer
+---@param p player_t
 hook.addHook("PrePlayerThink", function(p)
     if Squigglepants.sync.gamestate == SST_NONE then return end
     local vote = p.squigglepants.vote
@@ -266,6 +270,7 @@ local function drawVoteBG(v)
     Squigglepants.HUD.patchFill(v, x, y, nil, nil, bgScale, patch, V_SNAPTOTOP|V_SNAPTOLEFT)
 end
 
+---@param self SquigglepantsGametype
 ---@param v videolib
 local function resultsHUD(self, v)
     local fadeTime_passed = fadeTime - (Squigglepants.sync.inttime - (inttime.value * TICRATE/2))
@@ -283,18 +288,18 @@ local function resultsHUD(self, v)
         -- TODO: figure out a good cropping method for the line; gfx doesn't work for intended thingie
         v.drawScaled(320*FU - mapPicture.width * gfxScale, 0, gfxScale, mapPicture, V_SNAPTORIGHT|V_SNAPTOTOP)
 
-        v.drawString(8, 8, Squigglepants.gametypes[Squigglepants.sync.gametype].name + " - " + G_BuildMapTitle(gamemap), V_SNAPTOTOP|V_SNAPTOLEFT|V_ALLOWLOWERCASE)
+        v.drawString(8, 8, self.name + " - " + G_BuildMapTitle(gamemap), V_SNAPTOTOP|V_SNAPTOLEFT|V_ALLOWLOWERCASE)
 
         local x = 8
         local yPos = 0
         local plyrPos = 1
         local truePos = 1
-        for _, t in ipairs(Squigglepants.sync.placements) do ---@param p squigglepantsPlayer
+        for _, t in ipairs(Squigglepants.sync.placements) do ---@param p player_t
             plyrPos = truePos
             for _, p in ipairs(t) do
                 if not (p and p.valid) then continue end
 
-                v.drawString(x, stripHeight + 8 + 12 * yPos, plyrPos + "- " + p.name + ": " + self.placement.value(p), 0, "thin")
+                v.drawString(x, stripHeight + 8 + 12 * yPos, plyrPos + "- " + p.name + ": " + self.placement.value(self, p), 0, "thin")
                 yPos = $+1
 
                 truePos = $+1
@@ -402,18 +407,18 @@ local function drawVoteExtras(v, timeleft)
     local timercircle = Squigglepants.HUD.getPatch(v, "TIMERCIRCLE") ---@type patch_t
     v.drawScaled(160*FU - timercircle.width*FU/4, 100*FU - timercircle.height*FU/4, FU/2, timercircle, V_HUDTRANS)
     v.drawString(160, 100 - 4, timeleft, V_HUDTRANS, "center")
-    v.drawString(160, 1, "please wait while the programmer takes her nap!", V_SNAPTOTOP|V_HUDTRANS|V_ALLOWLOWERCASE, "thin-center")
+    v.drawString(160, 1, (Squigglepants.sync.curQuote or "Whoops! You have to put the CD in your computer."), V_SNAPTOTOP|V_HUDTRANS|V_ALLOWLOWERCASE, "thin-center")
 end
 
 ---@param v videolib
 local function voteHUD(v)
-    local p = displayplayer ---@type squigglepantsPlayer
+    local p = displayplayer ---@type player_t
     local vote = p.squigglepants.vote
 
     drawVoteBG(v)
 
     local playerList = {}
-    for ip in players.iterate do ---@param ip squigglepantsPlayer
+    for ip in players.iterate do ---@param ip player_t
         if not ip.squigglepants.vote.selected then continue end
         local ivote = ip.squigglepants.vote
 
@@ -447,7 +452,7 @@ local function voteHUD(v)
                 margin = -9 * (#playerList[i] - 6) * FU
             end
 
-            for _, ip in ipairs(playerList[i]) do ---@param ip squigglepantsPlayer
+            for _, ip in ipairs(playerList[i]) do ---@param ip player_t
                 local char
                 local spr2 = SPR2_LIFE
                 while not (char and char.valid) do

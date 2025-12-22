@@ -103,7 +103,7 @@ Squigglepants.addGametype({
             return a.rings > b.rings
         end,
 
-        value = function(p)
+        value = function(_, p)
             return p.rings
         end
     }

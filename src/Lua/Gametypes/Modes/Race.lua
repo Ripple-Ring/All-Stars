@@ -65,44 +65,26 @@ Squigglepants.addGametype({
         end
 
         if (leveltime % 5) == 0 then
-            local temp_placements = {}
+            self.placements = {}
             for p in players.iterate do
-                temp_placements[#temp_placements+1] = p
+                self.placements[#self.placements+1] = p
             end
 
-            ---@param p1 squigglepantsPlayer
-            ---@param p2 squigglepantsPlayer
-            table.sort(temp_placements, function(p1, p2)
+            self.placements = Squigglepants.sortTied($, function(p1, p2)
                 if p1.starpostnum ~= p2.starpostnum then
                     return p1.starpostnum < p2.starpostnum
                 end
 
                 local checkpoint = self.checkpointList[p1.starpostnum+1] or self.checkpointList[#self.checkpointList]
                 return R_PointToDist2(p1.realmo.x, p1.realmo.y, checkpoint.x, checkpoint.y) < R_PointToDist2(p2.realmo.x, p2.realmo.y, checkpoint.x, checkpoint.y)
-            end)
-
-            local true_placements = {}
-            local trueKey = 1
-            local prevPlyr
-            for _, p in ipairs(temp_placements) do
-                if not (p and p.valid) then continue end
-
-                if (prevPlyr and prevPlyr.valid)
-                and prevPlyr.starpostnum == p.starpostnum then
-                    local checkpoint = self.checkpointList[p.starpostnum+1] or self.checkpointList[#self.checkpointList]
-                    if abs(R_PointToDist2(prevPlyr.realmo.x, prevPlyr.realmo.y, checkpoint.x, checkpoint.y) - R_PointToDist2(p.realmo.x, p.realmo.y, checkpoint.x, checkpoint.y)) <= p.realmo.radius + prevPlyr.realmo.radius then
-                        table.insert(true_placements[trueKey-1], p)
-                        prevPlyr = p
-                        continue
-                    end
+            end, function(prev_p, p)
+                if prev_p.starpostnum ~= p.starpostnum then
+                    return p.starpostnum
                 end
 
-                true_placements[trueKey] = {p}
-                prevPlyr = p
-                trueKey = $+1
-            end
-
-            self.placements = true_placements
+                local checkpoint = self.checkpointList[p.starpostnum+1] or self.checkpointList[#self.checkpointList]
+                return R_PointToDist2(p.realmo.x, p.realmo.y, checkpoint.x, checkpoint.y) < R_PointToDist2(prev_p.realmo.x, prev_p.realmo.y, checkpoint.x, checkpoint.y)
+            end)
         end
 
         self.leveltime = $+1
@@ -164,7 +146,7 @@ Squigglepants.addGametype({
             return (a.squigglepants and b.squigglepants) and a.squigglepants.race_time < b.squigglepants.race_time
         end,
 
-        value = function(p)
+        value = function(_, p)
             return ticsToTimeString(p.squigglepants.race_time)
         end
     }

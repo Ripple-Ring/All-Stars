@@ -52,7 +52,7 @@ local function genSquigglepants()
     }
 end
 
----@class squigglepantsPlayer: player_t -- just so it autocompletes :D
+---@class player_t -- just so it autocompletes :D
 local autocompleteifitwascool = {squigglepants = genSquigglepants()}
 
 addHook("ThinkFrame", function()
@@ -63,7 +63,7 @@ addHook("ThinkFrame", function()
         return
     end
 
-    ---@param p squigglepantsPlayer
+    ---@param p player_t
     for p in players.iterate do
         if p.squigglepants == nil then
             p.squigglepants = genSquigglepants()

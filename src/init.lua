@@ -22,14 +22,18 @@ rawset(_G, "Squigglepants", { -- and our variable! below is also variable stuff
 		gamestate = -1, ---@type integer what gamestate is it? uses SST_ constants
 		inttime = 0, ---@type tic_t how many tics is it left before intermission ends?
         voteMaps = {}, ---@type table<number> the maps available to vote, goes from 1 to 3
-        selectedMap = {} ---@type table the map that's been selected
-	}
+        selectedMap = {}, ---@type table the map that's been selected
+        curQuote = nil ---@type string? the current quote shown in the voting screen
+	},
+    altMusic = {
+        ["KARSGR"] = "SBBGOR",
+        ["POTANY"] = "PTANNI"
+    },
+    defaultQuotes = {
+        "The programmer has a nap.\nHold out! Programmer!",
+        "If I could be somebody else, I would be Terry Cavanagh"
+    }
 })
-
-Squigglepants.altMusic = {
-    ["KARSGR"] = "SBBGOR",
-    ["POTANY"] = "PTANNI"
-}
 
 rawset(_G, "SST_NONE", -1)
 rawset(_G, "SST_INTERTRANS", 0) -- INTERmission TRANSition :D / or you could say that.... inter is transgender ?????? :OOOO

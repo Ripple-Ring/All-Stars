@@ -52,12 +52,13 @@ function Squigglepants.sortTied(t, sortFunc, valFunc)
     
     local newTable = {}
     local valList = {}
+    local prevVal
     for _, val in ipairs(t) do
         local trueVal = val
         if type(valFunc) == "function" then
-            local newVal = valFunc(val)
+            local newVal = valFunc(prevVal, val)
             if newVal ~= nil then
-                trueVal = valFunc(val)
+                trueVal = newVal
             end
         end
 
@@ -67,6 +68,8 @@ function Squigglepants.sortTied(t, sortFunc, valFunc)
             table.insert(newTable, {val})
             valList[trueVal] = newTable[#newTable]
         end
+
+        prevVal = val
     end
     
     return newTable
@@ -81,6 +84,7 @@ end
 ---@param position integer?
 ---@param prefadems integer?
 ---@param fadeinms integer?
+---@return string
 function Squigglepants.changeMusic(musicname, looping, player, mflags, position, prefadems, fadeinms)
     if Squigglepants.altMusic[musicname]
     and P_RandomChance(FU/10) then
