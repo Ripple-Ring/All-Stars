@@ -30,8 +30,15 @@ rawset(_G, "Squigglepants", { -- and our variable! below is also variable stuff
         ["POTANY"] = "PTANNI"
     },
     defaultQuotes = {
+		-- pac
         "The programmer has a nap.\nHold out! Programmer!",
-        "If I could be somebody else, I would be Terry Cavanagh"
+        "If I could be somebody else, I would be Terry Cavanagh",
+		
+		-- slude
+		"If you could be anyone for a day who would you be? . . . Uncle Grandpa!",
+		"Check out the voting screen, there's even a map that destroys all opps!",
+		"In the thick of it...",
+		"*Don't give it a second thought*"
     }
 })
 
