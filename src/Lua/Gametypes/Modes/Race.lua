@@ -78,7 +78,8 @@ Squigglepants.addGametype({
                 local checkpoint = self.checkpointList[p1.starpostnum+1] or self.checkpointList[#self.checkpointList]
                 return R_PointToDist2(p1.realmo.x, p1.realmo.y, checkpoint.x, checkpoint.y) < R_PointToDist2(p2.realmo.x, p2.realmo.y, checkpoint.x, checkpoint.y)
             end, function(prev_p, p)
-                if prev_p.starpostnum ~= p.starpostnum then
+                if not (prev_p and prev_p.valid)
+                or prev_p.starpostnum ~= p.starpostnum then
                     return p.starpostnum
                 end
 
