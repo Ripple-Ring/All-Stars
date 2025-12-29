@@ -12,6 +12,9 @@ local fadeTime = 2*TICRATE
 sfxinfo[freeslot("sfx_kirlon")].caption = "you win!!!"
 sfxinfo[freeslot("sfx_kirsho")].caption = "you tried"
 
+freeslot("SPR2_ASVH") -- voting screen sprite thing
+spr2defaults[SPR2_ASVH] = SPR2_LIFE
+
 ---Gets a random map. Capable of blacklisting maps & gamemodes
 ---@param map_blacklist function?
 ---@param mode_blacklist function?
@@ -397,7 +400,7 @@ local function drawVoteMaps(v, offsetX, offsetY, margin)
 
         local x, y = (160*FU + xAdd + offsetX), (100*FU + yAdd + offsetY)
 
-       drawVoteMap(v, x, y, mapnum, modenum, align)
+        drawVoteMap(v, x, y, mapnum, modenum, align)
     end
 end
 
@@ -416,6 +419,7 @@ local function voteHUD(v)
     local vote = p.squigglepants.vote
 
     drawVoteBG(v)
+    drawVoteMaps(v)
 
     local playerList = {}
     for ip in players.iterate do ---@param ip player_t
@@ -430,55 +434,68 @@ local function voteHUD(v)
         end
     end
 
-    drawVoteMaps(v)
-    local mapHovered = vote.selX + 2*(vote.selY - 1)
-
-    local xAdd = -(mapMargin + lvlWidth)
-    local xMul = 1
-    local yAdd = -(mapMargin + lvlHeight)
-    if (mapHovered % 2) == 0 then
-        xAdd = lvlWidth
-        xMul = -1
-    end
-    if mapHovered > 2 then
-        yAdd = mapMargin
-    end
-
-    local x, y = (160*FU + xAdd) + 2*FU, (100*FU + yAdd) + 2*FU
+    local xPos, yPos = {}, {}
     for i = 1, 4 do
-        if playerList[i] then
-            local margin = 2*FU
-            if #playerList[i] > 6 then
-                margin = -9 * (#playerList[i] - 6) * FU
-            end
+        local xAdd = -(mapMargin + lvlWidth)
+        local xMul = 1
+        local yAdd = -(mapMargin + lvlHeight)
+        if (i % 2) == 0 then
+            xAdd = lvlWidth
+            xMul = -1
+        end
+        if i > 2 then
+            yAdd = mapMargin
+        end
 
-            for _, ip in ipairs(playerList[i]) do ---@param ip player_t
-                local char
-                local spr2 = SPR2_LIFE
-                while not (char and char.valid) do
-                    char = v.getSprite2Patch(ip.skin, spr2)
-                    spr2 = spr2defaults[$]
-                end
-                local charScale = (skins[ip.skin].flags & SF_HIRES) and skins[ip.skin].highresscale or FU
-                local charAdd = xMul == -1 and -char.width*charScale or 0
+        xPos[i], yPos[i] = (160*FU + xAdd) + 2*FU, (100*FU + yAdd) + 2*FU
 
-                v.drawScaled(x + charAdd + char.leftoffset*charScale, y + char.topoffset*charScale, charScale, char, V_HUDTRANS, v.getColormap(ip.skin, ip.skincolor))
-                x = $ + (char.width*charScale + margin) * xMul
+        if not playerList[i] then continue end
+
+        local margin = 2*FU
+        if #playerList[i] > 6 then
+            margin = -9 * (#playerList[i] - 6) * FU
+        end
+
+        for _, ip in ipairs(playerList[i]) do ---@param ip player_t
+            local char
+            local spr2 = SPR2_LIFE
+            while not (char and char.valid) do
+                char = v.getSprite2Patch(ip.skin, spr2)
+                spr2 = spr2defaults[$]
             end
+            local charScale = (skins[ip.skin].flags & SF_HIRES) and skins[ip.skin].highresscale or FU
+            local charAdd = xMul == -1 and -char.width*charScale or 0
+
+            v.drawScaled(xPos[i] + charAdd + char.leftoffset*charScale, yPos[i] + char.topoffset*charScale, charScale, char, V_HUDTRANS, v.getColormap(ip.skin, ip.skincolor))
+            xPos[i] = $ + (char.width*charScale + margin) * xMul
         end
     end
 
     if not vote.selected then
+        local mapHovered = vote.selX + 2*(vote.selY - 1)
+        local xMul = 1
+        if (mapHovered % 2) == 0 then
+            xMul = -1
+        end
+
         local char
-        local spr2 = SPR2_LIFE
+        local spr2 = SPR2_AVSH
+        local colormap
         while not (char and char.valid) do
             char = v.getSprite2Patch(p.skin, spr2)
             spr2 = spr2defaults[$]
         end
+
+        if spr2 == SPR2_ASVH then
+            colormap = v.getColormap(p.skin, p.skincolor)
+        else
+            colormap = v.getColormap(TC_DEFAULT, 0, "Squigglepants_EyesOnly")
+        end
+
         local charScale = (skins[p.skin].flags & SF_HIRES) and skins[p.skin].highresscale or FU
         local charAdd = xMul == -1 and -char.width*charScale or 0
 
-        v.drawScaled(x + charAdd + char.leftoffset*charScale, y + char.topoffset*charScale, charScale, char, V_HUDTRANS, v.getColormap(TC_DEFAULT, 0, "Squigglepants_EyesOnly"))
+        v.drawScaled(xPos[mapHovered] + charAdd + char.leftoffset*charScale, yPos[mapHovered] + char.topoffset*charScale, charScale, char, V_HUDTRANS, colormap)
     end
     
     drawVoteExtras(v, Squigglepants.sync.inttime/TICRATE+1)
