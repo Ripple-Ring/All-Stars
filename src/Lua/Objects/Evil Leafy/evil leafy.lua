@@ -103,7 +103,7 @@ local function getPath(mo, speed)
             for _, val in ipairs(availablePaths) do
                 if val == neighbor then
                     foundNeighbor = true
-                    break 1
+                    break 1 ---@diagnostic disable-line
                 end
             end
 
@@ -137,7 +137,8 @@ freeslot(
     "MT_ALLSTARS_EVILLEAFY"
 )
 
-states[S_ALLSTARS_EVILLEAFY] = {
+---@diagnostic disable: missing-fields
+states[S_ALLSTARS_EVILLEAFY] = { 
     sprite = SPR_EVLF,
     frame = A,
     tics = -1

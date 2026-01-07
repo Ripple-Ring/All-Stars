@@ -74,7 +74,7 @@ function Squigglepants.endRound()
         gtDef:onend()
 
         if gtDef.hasIntermission then
-            Squigglepants.sync.placements = {}
+            Squigglepants.sync.placements = {} ---@type table<integer, player_t>
             for p in players.iterate do
                 Squigglepants.sync.placements[#Squigglepants.sync.placements+1] = p
             end
@@ -235,7 +235,7 @@ hook.addHook("PrePlayerThink", function(p)
             for _, np in ipairs(t) do
                 if np == p then
                     position = plyrPos
-                    break 2
+                    break 2 ---@diagnostic disable-line
                 end
                 truePos = $+1
             end
@@ -297,9 +297,9 @@ local function resultsHUD(self, v)
         local yPos = 0
         local plyrPos = 1
         local truePos = 1
-        for _, t in ipairs(Squigglepants.sync.placements) do ---@param p player_t
+        for _, t in ipairs(Squigglepants.sync.placements) do
             plyrPos = truePos
-            for _, p in ipairs(t) do
+            for _, p in ipairs(t) do ---@param p player_t
                 if not (p and p.valid) then continue end
 
                 v.drawString(x, stripHeight + 8 + 12 * yPos, plyrPos + "- " + p.name + ": " + self.placement.value(self, p), 0, "thin")
@@ -335,8 +335,6 @@ end
 ---@param map integer
 ---@param gametype_num integer
 ---@param align integer?
----@return fixed_t
----@return fixed_t
 local function drawVoteMap(v, x, y, map, gametype_num, align)
     local lvlgfx, modeName, lvlName = Squigglepants.HUD.getPatch(v, "BLANKLVL"), "???", "???"
     
@@ -381,7 +379,7 @@ local function drawVoteMaps(v, offsetX, offsetY, margin)
     for i = 1, 4 do
         local map = Squigglepants.sync.voteMaps[i]
 
-        local mapnum, modenum = unpack(map)
+        local mapnum, modenum = unpack(map) ---@diagnostic disable-line: deprecated
         if i >= 4 then
             mapnum = 0
             modenum = INT32_MAX
@@ -526,7 +524,7 @@ local function rouletteHUD(v)
         local time = min(FixedDiv(timeleft - pre_centerWait, centerTime), FU)
         for i = 1, 4 do
             local map = Squigglepants.sync.voteMaps[i]
-            local mapnum, modenum = unpack(map)
+            local mapnum, modenum = unpack(map) ---@diagnostic disable-line: deprecated
             
             if i >= 4 then
                 mapnum, modenum = 0, INT32_MAX

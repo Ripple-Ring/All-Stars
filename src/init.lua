@@ -69,4 +69,8 @@ dofile("Objects/Evil Leafy/evil leafy.lua")
 dofile("Gametypes/handler.lua")
 dofile("Gametypes/Modes/Race.lua")
 dofile("Gametypes/Modes/Gourmet Race.lua")
---dofile("Gametypes/Modes/Evil Leafy.lua")
+
+if devparm then
+    dofile("Gametypes/Modes/Evil Leafy.lua")
+    dofile("Libs/codec.lua")
+end
