@@ -11,6 +11,7 @@ function A_MarioDecide(mo)
 	mo.jumptics = max(P_RandomRange(-maxJumpTics * 2, maxJumpTics), 0)
 end
 
+---@diagnostic disable: missing-fields
 mobjinfo[MT_SO_RETRO] = {
 	--$Title Mario
 	--$Sprite SRMRARAL

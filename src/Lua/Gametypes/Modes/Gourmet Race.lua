@@ -1,6 +1,7 @@
 
 freeslot("SPR_GORA", "S_ALLSTARS_FOOD", "MT_ALLSTARS_FOOD", "sfx_asgrfc")
 
+---@diagnostic disable: missing-fields
 states[S_ALLSTARS_FOOD] = {
     sprite = SPR_GORA,
     frame = A,

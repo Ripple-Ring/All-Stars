@@ -64,6 +64,13 @@ local dofile = Squigglepants.dofile
 dofile("Game/handler.lua")
 dofile("Game/voting.lua")
 
+dofile("Objects/Evil Leafy/evil leafy.lua")
+
 dofile("Gametypes/handler.lua")
 dofile("Gametypes/Modes/Race.lua")
 dofile("Gametypes/Modes/Gourmet Race.lua")
+
+if devparm then
+    dofile("Gametypes/Modes/Evil Leafy.lua")
+    dofile("Libs/codec.lua")
+end

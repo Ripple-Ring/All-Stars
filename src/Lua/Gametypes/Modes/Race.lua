@@ -135,7 +135,7 @@ Squigglepants.addGametype({
                     if t_p ~= p then continue end
 
                     v.drawString(320 - 16, 200 - 16, key, V_SNAPTOBOTTOM|V_SNAPTORIGHT|V_PERPLAYER, "right")
-                    break 2
+                    break 2 ---@diagnostic disable-line
                 end
             end
         end

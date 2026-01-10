@@ -11,7 +11,7 @@ function Squigglepants.dofile(file)
     end
 
     if type(storedFiles[file]) == "table" then
-        return unpack(storedFiles[file])
+        return unpack(storedFiles[file]) ---@diagnostic disable-line: deprecated
     end
     return (storedFiles[file])
 end
